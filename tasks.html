@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Task Manager</title>
+  <style>
+    /* CSS styles for the task manager */
+    body {
+      font-family: Arial, sans-serif;
+    }
+    h1 {
+      text-align: center;
+    }
+    .task-list {
+      list-style-type: none;
+      padding: 0;
+      border-style:solid;
+      border-color: rgb(220, 148, 148);
+      border-width: 2px;
+      border-radius: 10px;
+      padding-left: 25vh;
+      margin:5px;
+    }
+    .finished-task-list {
+      list-style-type: none;
+      padding: 0;
+      border-style:solid;
+      border-color:rgb(159, 199, 159);
+      border-width: 2px;
+      border-radius: 10px;
+      padding-left: 25vh;
+      margin:5px;
+    }
+    .task-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .task-form{
+        align-items: center;
+        text-align: center;
+    }
+    .completed-task-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      color: grey;
+      text-decoration: line-through;
+    }
+    .task-item input[type="checkbox"] {
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Task Manager</h1>
+
+  <form id="taskForm" class="task-form">
+    <label for="taskInput">Add Task:</label>
+    <input type="text" id="taskInput" required>
+    <button type="submit">Add</button>
+  </form>
+
+  <h2>Tasks</h2>
+  <ul id="taskList" class="task-list"></ul>
+
+  <h2>Finished Tasks</h2>
+  <ul id="completedTaskList" class="finished-task-list"></ul>
+
+  <script>
+    // JavaScript logic for the task manager
+    const taskForm = document.getElementById('taskForm');
+    const taskInput = document.getElementById('taskInput');
+    const taskList = document.getElementById('taskList');
+    const completedTaskList = document.getElementById('completedTaskList');
+
+    taskForm.addEventListener('submit', function (event) {
+      event.preventDefault(); // Prevent form submission
+
+      const taskText = taskInput.value.trim();
+      if (taskText !== '') {
+        addTask(taskText);
+        taskInput.value = ''; // Clear the input field
+      }
+    });
+
+    function addTask(taskText) {
+      const taskItem = document.createElement('li');
+      taskItem.classList.add('task-item');
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.addEventListener('change', function () {
+        if (checkbox.checked) {
+          moveTaskToCompleted(taskItem);
+          saveTasksToStorage();
+        }
+      });
+
+      const taskLabel = document.createElement('span');
+      taskLabel.textContent = taskText;
+
+      taskItem.appendChild(checkbox);
+      taskItem.appendChild(taskLabel);
+      taskList.appendChild(taskItem);
+      saveTasksToStorage();
+    }
+
+    function moveTaskToCompleted(taskItem) {
+      const taskLabel = taskItem.querySelector('span');
+      const completedTaskItem = document.createElement('li');
+      completedTaskItem.classList.add('completed-task-item');
+
+      const completedTaskLabel = document.createElement('span');
+      completedTaskLabel.textContent = taskLabel.textContent;
+
+      completedTaskItem.appendChild(completedTaskLabel);
+      completedTaskList.appendChild(completedTaskItem);
+
+      taskItem.remove();
+      saveTasksToStorage();
+    }
+
+    function saveTasksToStorage() {
+      const tasks = {
+        unfinished: taskList.innerHTML,
+        finished: completedTaskList.innerHTML
+      };
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    function loadTasksFromStorage() {
+      const savedTasks = localStorage.getItem('tasks');
+      if (savedTasks) {
+        const tasks = JSON.parse(savedTasks);
+        taskList.innerHTML = tasks.unfinished;
+        completedTaskList.innerHTML = tasks.finished;
+      }
+    }
+
+    loadTasksFromStorage();
+  </script>
+</body>
+</html>
